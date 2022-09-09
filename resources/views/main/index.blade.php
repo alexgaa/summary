@@ -10,7 +10,7 @@
                     <span class="fs-5 fw-semibold">Опыт работы </span>
                 </button>
                 <div class="collapse" id="home-collapse" style="">
-                    <p> <b>Декабрь 2021 -  настоящее время</b>, SELL TEAM, PARTS iD, Inc.(https://www.carbid.com)<br>
+                    <p> <b>Декабрь 2021 -  настоящее время</b>, SELL TEAM, PARTS iD, Inc.(https://www.carid.com)<br>
                         <b>Должность: </b>Junior PHP Developer,<br>
                         <b>Используемые технологии:</b> Php, Symfony, Laravel, Mysql, Docker, German, PhpUnit(Mockery)<br>
                         <b>Обязанности, проделанная работа:</b><br>
