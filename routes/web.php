@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\ExperienceController;
+use App\Http\Controllers\Admin\TechnologyController;
+use App\Http\Controllers\Admin\WorkController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MainController;
 
@@ -18,4 +22,13 @@ use App\Http\Controllers\MainController;
 //    return view('welcome');
 //});
 
-Route::get('/', [MainController::class, 'index']);
+Route::get('/', [MainController::class, 'index'])->name('main');
+
+Route::group(['prefix' => '/admin-panel'], function (){
+    Route::get('/',[AdminController::class, 'index'])->name("admin.index");
+
+    Route::resource('/experience', ExperienceController::class);
+    Route::resource('/technology', TechnologyController::class);
+    Route::resource('/work', WorkController::class);
+});
+
