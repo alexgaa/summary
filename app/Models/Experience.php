@@ -17,7 +17,9 @@ class Experience extends Model
      */
     public function technologies(): BelongsToMany
     {
-        return $this->belongsToMany(Technology::class);
+        return $this->belongsToMany(Technology::class)
+            ->withPivot('priority')
+            ->withTimestamps();
     }
 
     /**
@@ -25,6 +27,8 @@ class Experience extends Model
      */
     public function works(): BelongsToMany
     {
-        return $this->belongsToMany(Work::class);
+        return $this->belongsToMany(Work::class)
+            ->withPivot('priority')
+            ->withTimestamps();
     }
 }

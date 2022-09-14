@@ -4,7 +4,7 @@
 @section('content')
 <!-- Default box -->
 <div class="card">
-    <div class="card-header">
+    <div class="card-header bg-primary">
         <h3 class="card-title text-bold">Add new experience</h3>
     </div>
     <div class="card-body">
@@ -30,6 +30,17 @@
                        value="{{old('end_date')}}"
                 >
             </div>
+            <div class="mb-3">
+                <label for="company_name" class="form-label">Company:</label>
+                <input name="company_name" type="text" id="company_name"
+                       class="form-control
+                        @error('company_name')
+                            border-danger
+                        @enderror"
+                       value="{{old('company_name')}}"
+                >
+            </div>
+
             <div class="mb-3">
                 <label for="position" class="form-label">Position:</label>
                 <input name="position" type="text" id="position"

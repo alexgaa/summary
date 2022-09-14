@@ -180,25 +180,11 @@
 
             <!-- Default box -->
             <div class="card mt-2">
-                <div class="card-body">
-                    <!-- Content Header (Page header) -->
-                    <section class="content-header">
-                        <div class="container-fluid">
-                            <div class="row mb-2">
-                                <div class="col-sm-6">
-                                    @yield('header')
-                                </div>
-                            </div>
-                        </div><!-- /.container-fluid -->
-                    </section>
-
-                    @yield('content')
-                </div>
                 <div class="content">
-                    <div class="row m-1 ml-4 mr-4">
+                    <div class="row m-0 mt-1 ml-4 mr-4">
                         <div class="col-12">
                             @if(session()->has('status'))
-                                <div class="alert alert-success">
+                                <div class="alert alert-success pb-1 mb-1">
                                     {{session('status') }}
                                 </div>
                             @endif
@@ -219,6 +205,21 @@
                         </div>
                     </div>
                 </div>
+                <div class="card-body pt-1">
+                    <!-- Content Header (Page header) -->
+                    <section class="content-header pt-1">
+                        <div class="container-fluid">
+                            <div class="row mb-2">
+                                <div class="col-sm-6">
+                                    @yield('header')
+                                </div>
+                            </div>
+                        </div><!-- /.container-fluid -->
+                    </section>
+
+                    @yield('content')
+                </div>
+
             </div>
             <!-- /.card -->
         </section>

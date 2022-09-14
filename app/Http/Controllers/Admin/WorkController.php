@@ -20,7 +20,7 @@ class WorkController extends Controller
      */
     public function index()
     {
-        $works = Work::query()->paginate(5);
+        $works = Work::query()->orderBy('name')->paginate(5);
         return view('admin.work.index', compact('works'));
     }
 

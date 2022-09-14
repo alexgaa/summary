@@ -14,6 +14,6 @@ class Work extends Model
      */
     public function experiences(): BelongsToMany
     {
-        return $this->belongsToMany(Experience::class);
+        return $this->belongsToMany(Experience::class)->withTimestamps();
     }
 }

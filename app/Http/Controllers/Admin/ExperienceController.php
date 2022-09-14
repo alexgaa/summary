@@ -13,12 +13,14 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 
 class ExperienceController extends Controller
 {
     private const VALIDATE_RULES = [
         'start_date' => 'required|date',
         'end_date' => 'nullable|date',
+        'company_name' => 'required|max:255|min:2',
         'position' => 'required|max:100|min:2'
     ];
 
@@ -27,8 +29,39 @@ class ExperienceController extends Controller
      */
     public function index()
     {
-        $experiences = Experience::query()->with(['technologies', 'works'])->paginate(5);
-        return view('admin.experience.index', compact('experiences'));
+        $technologies = DB::table('experiences')
+            ->select('experiences.id',
+                'experience_technology.priority',
+                'technologies.name as technologies_name')
+            ->join('experience_technology',
+                'experience_technology.experience_id',
+                '=', 'experiences.id')
+            ->join('technologies',
+                'experience_technology.technology_id',
+                '=', 'technologies.id')
+            ->orderBy('experience_technology.priority')
+            ->get();
+
+        $works = DB::table('experiences')
+            ->select('experiences.id',
+                'experience_work.priority',
+                'works.name as work_name')
+            ->join('experience_work',
+                'experience_work.experience_id',
+                '=', 'experiences.id')
+            ->join('works',
+                'experience_work.work_id',
+                '=', 'works.id')
+            ->orderBy('experience_work.priority')
+            ->get();
+
+        $experiences = DB::table('experiences')
+            ->orderByDesc('experiences.start_date')
+            ->paginate(2);
+
+
+
+        return view('admin.experience.index', compact('experiences', 'technologies', 'works'));
     }
 
     /**
@@ -36,8 +69,8 @@ class ExperienceController extends Controller
      */
     public function create()
     {
-        $technologies = Technology::query()->pluck('name', 'id');
-        $works = Work::query()->pluck('name', 'id');
+        $technologies = Technology::query()->orderBy('name')->pluck('name', 'id');
+        $works = Work::query()->orderBy('name')->pluck('name', 'id');
         return view('admin.experience.create', compact('technologies', 'works'));
     }
 
@@ -45,11 +78,12 @@ class ExperienceController extends Controller
      * @param Request $request
      * @return RedirectResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $request->validate(self::VALIDATE_RULES);
 
         $experience = new Experience();
+        $experience->company_name = $request->company_name;
         $experience->start_date = $request->start_date;
         $experience->end_date = $request->end_date;
         $experience->position = $request->position;
@@ -66,8 +100,8 @@ class ExperienceController extends Controller
     public function edit($id)
     {
         $experience = Experience::query()->find($id);
-        $technologies = Technology::query()->pluck('name', 'id');
-        $works = Work::query()->pluck('name', 'id');
+        $technologies = Technology::query()->orderBy('name')->pluck('name', 'id');
+        $works = Work::query()->orderBy('name')->pluck('name', 'id');
         return view('admin.experience.edit', compact("experience", "technologies", "works"));
     }
 
@@ -76,18 +110,18 @@ class ExperienceController extends Controller
      * @param $id
      * @return RedirectResponse
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): RedirectResponse
     {
         $experience = Experience::query()->find($id);
         if($experience) {
             $request->validate(self::VALIDATE_RULES);
             $experience->start_date = $request->start_date;
             $experience->end_date = $request->end_date;
+            $experience->company_name = $request->company_name;
             $experience->position = $request->position;
             $experience->save();
 
-
-            $experience->technologies()->sync($request->technologies);
+            $experience->technologies()->syncWithPivotValues($request->technologies,['priority' => 99]);
             $experience->works()->sync($request->works);
 
             $statusMessage = "Experience - '" . $request->position . "' updated!";
@@ -104,7 +138,7 @@ class ExperienceController extends Controller
      * @param $id
      * @return RedirectResponse
      */
-    public function destroy($id)
+    public function destroy($id): RedirectResponse
     {
         $errorMessage = 'Experience not found!!';
         $statusMessage = null;
@@ -122,4 +156,64 @@ class ExperienceController extends Controller
             'error' => $errorMessage
         ]);
     }
+
+    /**
+     * @param int $id
+     * @return Application|Factory|View
+     */
+    public function sortingTechnologies(int $id)
+    {
+        $experience = Experience::query()->find($id);
+        return view('admin.experience.sortingTechnologies', compact('experience'));
+    }
+
+    /**
+     * @param Request $request
+     * @param $id
+     * @return RedirectResponse
+     */
+    public function sortingTechnologiesUpdate(Request $request, $id): RedirectResponse
+    {
+        $experience = Experience::query()->find($id);
+        $experience->technologies()->sync([]);
+
+        foreach ($request->technologies as $technologyId => $technologyPriority){
+            $experience->technologies()->attach($technologyId,['priority' => (int)$technologyPriority]);
+        }
+        $statusMessage = "Technology priorities updated";
+        return redirect()->route('experience.index')->with([
+            'status' => $statusMessage,
+        ]);
+    }
+
+    /**
+     * @param int $id
+     * @return Application|Factory|View
+     */
+    public function sortingWorks(int $id)
+    {
+        $experience = Experience::query()->find($id);
+        return view('admin.experience.sortingWorks', compact('experience'));
+    }
+
+    /**
+     * @param Request $request
+     * @param $id
+     * @return RedirectResponse
+     */
+    public function sortingWorksUpdate(Request $request, $id): RedirectResponse
+    {
+        $experience = Experience::query()->find($id);
+        $experience->works()->sync([]);
+
+        foreach ($request->works as $workId => $workPriority){
+            $experience->works()->attach($workId,['priority' => (int)$workPriority]);
+        }
+        $statusMessage = "Work priorities updated";
+        return redirect()->route('experience.index')->with([
+            'status' => $statusMessage,
+        ]);
+   }
 }
+
+
