@@ -32,7 +32,7 @@ class ExperienceController extends Controller
         $technologies = DB::table('experiences')
             ->select('experiences.id',
                 'experience_technology.priority',
-                'technologies.name as technologies_name')
+                'technologies.name as technology_name')
             ->join('experience_technology',
                 'experience_technology.experience_id',
                 '=', 'experiences.id')
@@ -57,7 +57,7 @@ class ExperienceController extends Controller
 
         $experiences = DB::table('experiences')
             ->orderByDesc('experiences.start_date')
-            ->paginate(2);
+            ->paginate(3);
 
 
 
@@ -121,7 +121,7 @@ class ExperienceController extends Controller
             $experience->position = $request->position;
             $experience->save();
 
-            $experience->technologies()->syncWithPivotValues($request->technologies,['priority' => 99]);
+            $experience->technologies()->sync($request->technologies);
             $experience->works()->sync($request->works);
 
             $statusMessage = "Experience - '" . $request->position . "' updated!";

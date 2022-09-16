@@ -36,7 +36,7 @@
                                     <td style="width: 150px">
                                         @foreach($technologies as $technology)
                                             @if($experience->id == $technology->id)
-                                                {{$technology->technologies_name}},
+                                                {{$technology->technology_name}},
                                             @endif
                                         @endforeach
                                         <a href="{{route('experience.sortingTechnologies', ["id"=>$experience->id])}}"

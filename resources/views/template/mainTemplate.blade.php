@@ -10,8 +10,8 @@
     <link rel="stylesheet" href="{{asset('css/summary.css')}}">
 </head>
 <body>
-    <header class="p-3 text-bg-dark mb-2">
-        <div class="container">
+<header class="p-3 text-bg-dark mb-2 sticky-top">
+        <div class="container" >
             <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
                 <p class="mb-2 mb-md-0 justify-content-center"> GAA</p>
 
@@ -34,17 +34,35 @@
             </div>
         </div>
     </header>
-    <div class="container-fluid pb-3">
-        <div class="d-grid gap-3" style="grid-template-columns: 1fr 2fr; ">
-            <div class="bg-light border rounded-3">
-                <br><br><br><br><br><br><br><br><br><br>
-            </div>
-            <div class="bg-light border rounded-3">
-                @yield('content')
-                <br><br><br><br><br><br><br><br><br><br>
+{{--    <div class="container-fluid pb-3">--}}
+
+{{--        <div class="d-grid gap-3" style="grid-template-columns: 1fr 2fr; ">--}}
+{{--            <div class="bg-light border rounded-3">--}}
+
+{{--            </div>--}}
+{{--            <div class="bg-light border rounded-3">--}}
+{{--                @yield('content')--}}
+
+{{--            </div>--}}
+{{--        </div>--}}
+{{--    </div>--}}
+
+
+<div class="container-fluid pb-2">
+    <div class="row g-2 ">
+        <div class="col-3 ">
+            <div class="p-3 m-2 border bg-light rounded-3">
+                Menu `<br><br><br>
             </div>
         </div>
+        <div class="col-9">
+            <div class="p-3 m-2 bg-light border rounded-3">
+                @yield('content')
+            </div>
+
+        </div>
     </div>
+</div>
 {{--    <div class="b-example-divider"> </div>--}}
     <div class="container">
         <footer class="py-1 my-0">
