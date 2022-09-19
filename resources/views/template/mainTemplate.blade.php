@@ -16,11 +16,13 @@
                 <p class="mb-2 mb-md-0 justify-content-center"> GAA</p>
 
                 <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-                    <li><a href="#" class="nav-link px-2 text-secondary">Home</a></li>
-                    <li><a href="{{route('admin.index')}}" class="nav-link px-2 text-white">Admin</a></li>
-                    <li><a href="#" class="nav-link px-2 text-white">Pricing</a></li>
-                    <li><a href="#" class="nav-link px-2 text-white">FAQs</a></li>
-                    <li><a href="#" class="nav-link px-2 text-white">About</a></li>
+                    <li><a href="{{route('main')}}" class="nav-link px-2 text-secondary">Home</a></li>
+                    @auth
+                        @if(auth()->user()->user_type === 1)
+                            <li><a href="{{route('admin.index')}}" class="nav-link px-2 text-white">Admin</a></li>
+                        @endif
+                    @endauth
+                    <li><a href="{{route('about')}}" class="nav-link px-2 text-white">About</a></li>
                 </ul>
 
                 <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
@@ -28,25 +30,17 @@
                 </form>
 
                 <div class="text-end">
-                    <button type="button" class="btn btn-outline-light me-2">Login</button>
-                    <button type="button" class="btn btn-warning">Sign-up</button>
+                    @auth
+                        <a href="{{route('logout')}}" type="button" class="btn btn-warning me-2">Logout</a>
+                    @else
+                        <a href="{{route('registerUser.create')}}" type="button" class="btn btn-outline-light me-2">Registration</a>
+                        <a href="{{route('login.create')}}" type="button" class="btn btn-outline-light me-2">Login</a>
+                    @endauth
+
                 </div>
             </div>
         </div>
     </header>
-{{--    <div class="container-fluid pb-3">--}}
-
-{{--        <div class="d-grid gap-3" style="grid-template-columns: 1fr 2fr; ">--}}
-{{--            <div class="bg-light border rounded-3">--}}
-
-{{--            </div>--}}
-{{--            <div class="bg-light border rounded-3">--}}
-{{--                @yield('content')--}}
-
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </div>--}}
-
 
 <div class="container-fluid pb-2">
     <div class="row g-2 ">
@@ -67,13 +61,15 @@
     <div class="container">
         <footer class="py-1 my-0">
             <ul class="nav justify-content-center border-bottom pb-3 mb-3">
-                <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Home</a></li>
-                <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Features</a></li>
-                <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Pricing</a></li>
-                <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">FAQs</a></li>
-                <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">About</a></li>
+                <li class="nav-item"><a href="{{route('main')}}" class="nav-link px-2 text-muted">Home</a></li>
+                @auth
+                    @if(auth()->user()->user_type === 1)
+                        <li class="nav-item"><a href="{{route('admin.index')}}" class="nav-link px-2 text-muted">Admin</a></li>
+                       @endif
+                @endauth
+                <li class="nav-item"><a href="{{route('about')}}" class="nav-link px-2 text-muted">About</a></li>
             </ul>
-            <p class="text-center text-muted">© 2022 Company, Inc</p>
+            <p class="text-center text-muted">© 2022 Gamov Aleksey</p>
         </footer>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>

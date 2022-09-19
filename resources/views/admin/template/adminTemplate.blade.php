@@ -56,7 +56,7 @@
         <ul class="navbar-nav ml-auto">
             <!-- Messages Dropdown Menu -->
             <li class="nav-item dropdown">
-                <a href="#" class="nav-link">Logout</a>
+                <a href="{{route('logout')}}" class="nav-link">Logout</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
