@@ -23,6 +23,7 @@
                                 <th style="width: 150px">Technologies</th>
                                 <th style="width: 300px">Works</th>
                                 <th style="width: 170px">Action</th>
+
                             </tr>
                             </thead>
                             <tbody>
@@ -71,7 +72,6 @@
                                                 <i class="fas fa-trash-alt"></i>
                                                 Delete</button>
                                         </form>
-
                                     </td>
                                 </tr>
                             @endforeach

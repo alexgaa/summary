@@ -7,12 +7,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Experience;
 use App\Models\Technology;
+use App\Models\User;
 use App\Models\Work;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ExperienceController extends Controller
@@ -21,57 +23,38 @@ class ExperienceController extends Controller
         'start_date' => 'required|date',
         'end_date' => 'nullable|date',
         'company_name' => 'required|max:255|min:2',
-        'position' => 'required|max:100|min:2'
-    ];
+        'position' => 'required|max:100|min:2',
+     ];
 
     /**
      * @return Application|Factory|View
      */
     public function index()
     {
-        $technologies = DB::table('experiences')
-            ->select('experiences.id',
-                'experience_technology.priority',
-                'technologies.name as technology_name')
-            ->join('experience_technology',
-                'experience_technology.experience_id',
-                '=', 'experiences.id')
-            ->join('technologies',
-                'experience_technology.technology_id',
-                '=', 'technologies.id')
-            ->orderBy('experience_technology.priority')
-            ->get();
-
-        $works = DB::table('experiences')
-            ->select('experiences.id',
-                'experience_work.priority',
-                'works.name as work_name')
-            ->join('experience_work',
-                'experience_work.experience_id',
-                '=', 'experiences.id')
-            ->join('works',
-                'experience_work.work_id',
-                '=', 'works.id')
-            ->orderBy('experience_work.priority')
-            ->get();
+        $technology = new Technology();
+        $technologies = $technology->selectExperienceWithTechnology();
+        $work = new Work();
+        $works = $work->selectExperienceWithWork();
 
         $experiences = DB::table('experiences')
             ->orderByDesc('experiences.start_date')
             ->paginate(3);
 
-
-
         return view('admin.experience.index', compact('experiences', 'technologies', 'works'));
     }
 
     /**
-     * @return Application|Factory|View
+     * @return Application|Factory|View|RedirectResponse
      */
     public function create()
     {
+        $users = [];
         $technologies = Technology::query()->orderBy('name')->pluck('name', 'id');
         $works = Work::query()->orderBy('name')->pluck('name', 'id');
-        return view('admin.experience.create', compact('technologies', 'works'));
+        if(Auth::user()->user_type === 1) {
+            $users = User::query()->select('id', 'name', 'email')->orderBy('name')->get();
+        }
+        return view('admin.experience.create', compact('technologies', 'works', 'users'));
     }
 
     /**
@@ -81,13 +64,18 @@ class ExperienceController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate(self::VALIDATE_RULES);
-
         $experience = new Experience();
-        $experience->company_name = $request->company_name;
-        $experience->start_date = $request->start_date;
-        $experience->end_date = $request->end_date;
-        $experience->position = $request->position;
-        $experience->save();
+        if(Auth::user()->user_type === 1) {
+            $user = User::query()->find($request->user_id);
+            if($user) {
+                $experience->user_id = $request->user_id;
+            } else {
+                return redirect()->back()->withErrors(['errorForm' =>"Incorrect User Id!"]);
+            }
+        } else {
+            $experience->user_id = Auth::user()->id;
+        }
+        $experience = $this->saveExperience($experience, $request);
         $experience->technologies()->attach($request->technologies);
         $experience->works()->attach($request->works);
         return redirect()->route('experience.create')->with('status', 'Experience ' . $request->position . ' added');
@@ -115,12 +103,7 @@ class ExperienceController extends Controller
         $experience = Experience::query()->find($id);
         if($experience) {
             $request->validate(self::VALIDATE_RULES);
-            $experience->start_date = $request->start_date;
-            $experience->end_date = $request->end_date;
-            $experience->company_name = $request->company_name;
-            $experience->position = $request->position;
-            $experience->save();
-
+            $experience = $this->saveExperience($experience, $request);
             $experience->technologies()->sync($request->technologies);
             $experience->works()->sync($request->works);
 
@@ -214,6 +197,22 @@ class ExperienceController extends Controller
             'status' => $statusMessage,
         ]);
    }
+
+
+    /**
+     * @param Experience $experience
+     * @param Request $request
+     * @return Experience
+     */
+    private function saveExperience(Experience $experience, Request $request): Experience
+    {
+        $experience->company_name = $request->company_name;
+        $experience->start_date = $request->start_date;
+        $experience->end_date = $request->end_date;
+        $experience->position = $request->position;
+        $experience->save();
+        return $experience;
+    }
 }
 
 

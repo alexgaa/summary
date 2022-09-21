@@ -37,7 +37,7 @@ class WorkController extends Controller
      * @param Request $request
      * @return RedirectResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'name' => self::RULES_FOR_VALIDATION_NAME
@@ -65,7 +65,7 @@ class WorkController extends Controller
      * @param $id
      * @return RedirectResponse
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): RedirectResponse
     {
         $work = Work::query()->find($id);
         if($work) {
@@ -90,7 +90,7 @@ class WorkController extends Controller
      * @param $id
      * @return RedirectResponse
      */
-    public function destroy($id)
+    public function destroy($id): RedirectResponse
     {
         $work = Work::query()->find($id);
         if($work) {

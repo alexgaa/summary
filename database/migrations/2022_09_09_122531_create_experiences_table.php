@@ -15,6 +15,8 @@ class CreateExperiencesTable extends Migration
     {
         Schema::create('experiences', function (Blueprint $table) {
             $table->integer('id')->autoIncrement();
+            $table->bigInteger('user_id')->unsigned();
+            $table->foreign('user_id')->references('id')->on('users');
             $table->date('start_date');
             $table->date('end_date')->nullable();
             $table->string('position', 100);

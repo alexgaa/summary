@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\AuthUserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\Auth\RegisteredUser;
+use App\Http\Controllers\Admin\UserFullDataController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,10 +34,13 @@ Route::group(['middleware' => 'guest'], function (){
 
 Route::get('logout', [AuthUserController::class,'logout'])->name('logout')->middleware('auth');
 
-Route::group(['prefix' => '/admin-panel', 'middleware' => 'admin'], function (){
+//Route::group(['prefix' => '/admin-panel', 'middleware' => 'admin'], function (){
+Route::group(['prefix' => '/admin-panel'], function (){
     Route::get('/',[AdminController::class, 'index'])->name("admin.index");
 
     Route::resource('/experience', ExperienceController::class);
+
+    Route::resource('/user-full-data', UserFullDataController::class);
 
     Route::get('/experience/sorting/{id}',
         [ExperienceController::class, 'sortingTechnologies'])->name('experience.sortingTechnologies');

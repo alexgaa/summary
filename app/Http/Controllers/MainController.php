@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Experience;
 use App\Models\Technology;
+use App\Models\UserFullData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -13,6 +14,7 @@ class MainController extends Controller
 {
     public function index()
     {
+
         $technologies = DB::table('experiences')
             ->select('experiences.id',
                 'experience_technology.priority',
@@ -44,6 +46,11 @@ class MainController extends Controller
             ->orderByDesc('experiences.start_date')
             ->get();
 
+
+//        $userFullData = new UserFullData();
+//        $userFullData->user_id = 2;
+//        $userFullData->name = 'aleksey';
+//        $userFullData->save();
 
 //        $technology = new Technology();
 //        $technology->name = 'Mysql2';
