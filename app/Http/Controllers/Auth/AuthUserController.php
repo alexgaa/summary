@@ -26,7 +26,7 @@ class AuthUserController extends Controller
      * @param Request $request
      * @return RedirectResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'email' => 'required|email',
@@ -37,20 +37,14 @@ class AuthUserController extends Controller
             'password' => $request->password,
         ])) {
             return redirect()->route('main')->with('status', "you are logged in!" );
-//            if(Auth::user()->is_admin === 1){
-//                return redirect()->route('admin.index')->with('status', "you are logged in!" );
-//            } else {
-//
-//            }
         }
-
         return redirect()->back()->withErrors(['errorForm' =>"Incorrect mail or password!"]);
     }
 
     /**
      * @return RedirectResponse
      */
-    public function logout()
+    public function logout(): RedirectResponse
     {
         Auth::logout();
         return redirect()->route('main');

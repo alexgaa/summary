@@ -13,9 +13,12 @@
                 @method('PUT')
                 <div class="card-body">
                     <div class="form-group row">
-                        <label for="user_id" class="col-sm-2 col-form-label">User :</label>
+                        <label for="user_id" class="col-sm-2 col-form-label">User Login:</label>
                         <div class="col-sm-8">
-                            {{$userFullData->user->name}} ({{$userFullData->user->email}})
+                            <input  type="text" id="name"
+                                   class="form-control text-blue"
+                                   disabled
+                                   value="{{$userFullData->user->name}} ({{$userFullData->user->email}})">
                             <input hidden name="user_id" type="text" id="user_id"
                                    class="form-control" value="-1">
                         </div>

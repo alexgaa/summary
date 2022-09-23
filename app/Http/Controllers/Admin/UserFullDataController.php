@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Crud\ExperienceCrud;
+use App\Crud\TechnologyCrud;
+use App\Crud\UserFullDataCrud;
+use App\Crud\WorkCrud;
+use App\Http\Controllers\AuthTrait;
 use App\Http\Controllers\Controller;
 use App\Models\Technology;
-use App\Models\User;
 use App\Models\UserFullData;
 use App\Models\Work;
 use Illuminate\Contracts\Foundation\Application;
@@ -14,39 +18,45 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Auth;
 
 class UserFullDataController extends Controller
 {
-    private const RULES_FOR_VALIDATION = [
-        'user_id' => 'required|integer|unique:user_full_data',
-        'name' => 'required|max:255|min:2',
-        'lastName' => 'nullable|max:255|min:2',
-        'middleName' => 'nullable|max:255|min:2',
-        'contact' =>'nullable',
-        'address' =>'nullable',
-        'dateOfBirth' =>'nullable|date',
-        'mainSkills' =>'nullable',
-        'education' =>'nullable',
-        'workLocation' =>'nullable',
-        'jobTitle' =>'nullable',
-        'achievements' =>'nullable',
-        'personalQualities' =>'nullable',
-        'other' =>'nullable',
-    ];
+    use AuthTrait;
+
+    private const ERROR_MASSAGE_NO_ACCESS = 'You do not have edit access!';
+
+    /** @var ExperienceCrud  */
+    private $experienceCrud;
+    /** @var TechnologyCrud  */
+    private $technologyCrud;
+    /** @var WorkCrud  */
+    private $workCrud;
+
+    private $usersFullData;
+
+    public function __construct()
+    {
+        $this->experienceCrud = new ExperienceCrud();
+        $this->technologyCrud = new TechnologyCrud();
+        $this->workCrud = new WorkCrud();
+        $this->usersFullDataCrud = new UserFullDataCrud();
+    }
 
     /**
      * @return Application|Factory|View
      */
     public function index()
     {
-        $technology = new Technology();
-        $technologies = $technology->selectExperienceWithTechnology();
-        $work = new Work();
-        $works = $work->selectExperienceWithWork();
+        $listUserIds = $this->getOnlyUsersListIds();
 
-        $usersFullData = UserFullData::query()->orderBy('name')->paginate(1);
+        $technology = new Technology();
+        $technologies = $technology->selectExperienceWithTechnology($listUserIds);
+        $work = new Work();
+        $works = $work->selectExperienceWithWork($listUserIds);
+
+        $usersFullData = $this->usersFullDataCrud->read($listUserIds);
+
         return view('admin.userFullData.index', compact('usersFullData', 'technologies', 'works'));
     }
 
@@ -57,15 +67,10 @@ class UserFullDataController extends Controller
      */
     public function create()
     {
-        $users = DB::table('users')
-            ->select('users.id', 'users.name', 'users.email')
-            ->leftJoin('user_full_data',
-                'users.id',
-                '=',
-                'user_full_data.user_id')
-            ->whereNull('user_full_data.user_id')->get();
+        $listUserIds = $this->getOnlyUsersListIds();
+        $usersFullData = $this->usersFullDataCrud->read($listUserIds);
 
-        return view('admin.userFullData.create', compact('users'));
+        return view('admin.userFullData.create', compact('usersFullData'));
     }
 
     /**
@@ -74,25 +79,23 @@ class UserFullDataController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate(self::RULES_FOR_VALIDATION);
-
-        $user = User::query()->find($request->user_id);
-        if($user){
-            $userData = new UserFullData();
-            $userData->user_id = $request->user_id;
-            $this->saveUserFullData($userData, $request);
+        if(!$this->usersFullDataCrud->create($request, Auth::user()->id)) {
+            return redirect()->route('user-full-data.create')->withErrors(['errorForm' =>"Save error!"]);
         }
 
-        return redirect()->route('user-full-data.create')->with('status', 'User data for: ' . $request->name . ' - added!');
+        return redirect()->route('admin.userFullData.index')->with('status', 'User data for: ' . $request->name . ' - added!');
     }
 
     /**
      * @param $id
-     * @return Application|Factory|View
+     * @return Application|Factory|View|RedirectResponse
      */
     public function edit($id)
     {
         $userFullData = UserFullData::query()->find($id);
+        if(!$this->checkAccessUser($userFullData)){
+            return redirect()->route('user-full-data.index')->withErrors(['errorForm' => self::ERROR_MASSAGE_NO_ACCESS]);
+        }
 
         return view('admin.userFullData.edit', compact('userFullData'));
     }
@@ -104,16 +107,14 @@ class UserFullDataController extends Controller
      */
     public function update(Request $request, int $id): RedirectResponse
     {
-        $userFullData = UserFullData::query()->find($id);
-        if($userFullData) {
-            $request->validate(self::RULES_FOR_VALIDATION);
-            $this->saveUserFullData($userFullData, $request);
+        if($this->usersFullDataCrud->update($request, $id)) {
             $statusMessage = "User data - '" . $request->name . "' - updated!";
             return redirect()
                 ->route('user-full-data.edit', ["user_full_datum"=>$id])
                 ->with('status', $statusMessage);
         }
         $statusMessage = "Error! User - id =" . $id . " not found!";
+
         return redirect()->route('admin.index')->with('error', $statusMessage);
     }
 
@@ -124,37 +125,18 @@ class UserFullDataController extends Controller
     public function destroy($id): RedirectResponse
     {
         $userFullData = UserFullData::query()->find($id);
+
         if($userFullData) {
+            if(!$this->checkAccessUser($userFullData)){
+                return redirect()->back()->withErrors(['errorForm' => self::ERROR_MASSAGE_NO_ACCESS]);
+            }
             $nameUserFullData = $userFullData->name;
-            $userFullData->delete();
+            $this->usersFullDataCrud->delete($id);
             $statusMessage = "User '" . $nameUserFullData  . "' deleted!";
         } else {
             $statusMessage = "User id = " . $id . " not found!";
         }
 
         return redirect()->route('user-full-data.index')->with('status', $statusMessage);
-    }
-
-    /**
-     * @param UserFullData $userData
-     * @param Request $request
-     * @return void
-     */
-    private function saveUserFullData(UserFullData $userData, Request $request): void
-    {
-        $userData->name = $request->name;
-        $userData->lastName = $request->lastName;
-        $userData->middleName = $request->middleName;
-        $userData->contact = $request->contact;
-        $userData->address = $request->address;
-        $userData->dateOfBirth = $request->dateOfBirth;
-        $userData->mainSkills = $request->mainSkills;
-        $userData->education = $request->education;
-        $userData->workLocation = $request->workLocation;
-        $userData->jobTitle = $request->jobTitle;
-        $userData->achievements = $request->achievements;
-        $userData->personalQualities = $request->personalQualities;
-        $userData->other = $request->other;
-        $userData->save();
     }
 }

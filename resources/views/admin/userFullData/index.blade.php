@@ -22,7 +22,7 @@
                         @method('DELETE')
                         @csrf
                         <button type="submit" class="btn btn-danger btn-sm"
-                                onclick="return confirm('Are you want delete Technology?')">
+                                onclick="return confirm('Are you want delete User Data?')">
                             <i class="fas fa-trash-alt"></i>
                             Delete
                         </button>
@@ -42,7 +42,9 @@
                </tr>
 
                 <tr>
-                    <td class="text-gray">Experiences: </td>
+                    <td class="text-gray">Experiences:
+                        <a class="btn btn-info btn-sm float-right mr-1" href="{{route("experience.create")}}"> Add new</a>
+                    </td>
                     <td>
                         <div class="card-body">
                         @if(!count($userData->user->experience))

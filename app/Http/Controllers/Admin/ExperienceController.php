@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Crud\ExperienceCrud;
+use App\Crud\TechnologyCrud;
+use App\Crud\WorkCrud;
+use App\Http\Controllers\AuthTrait;
 use App\Http\Controllers\Controller;
 use App\Models\Experience;
 use App\Models\Technology;
-use App\Models\User;
 use App\Models\Work;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\Foundation\Application;
@@ -15,30 +18,38 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class ExperienceController extends Controller
 {
-    private const VALIDATE_RULES = [
-        'start_date' => 'required|date',
-        'end_date' => 'nullable|date',
-        'company_name' => 'required|max:255|min:2',
-        'position' => 'required|max:100|min:2',
-     ];
+    use AuthTrait;
+    private const ERROR_MASSAGE_NO_ACCESS = 'You do not have edit access!';
+
+    /** @var ExperienceCrud  */
+    private $experienceCrud;
+    /** @var TechnologyCrud  */
+    private $technologyCrud;
+    /** @var WorkCrud  */
+    private $workCrud;
+
+    public function __construct()
+    {
+        $this->experienceCrud = new ExperienceCrud();
+        $this->technologyCrud = new TechnologyCrud();
+        $this->workCrud = new WorkCrud();
+    }
 
     /**
      * @return Application|Factory|View
      */
     public function index()
     {
+        $listUserIds = $this->getOnlyUsersListIds();
         $technology = new Technology();
-        $technologies = $technology->selectExperienceWithTechnology();
-        $work = new Work();
-        $works = $work->selectExperienceWithWork();
+        $technologies = $technology->selectExperienceWithTechnology($listUserIds);
 
-        $experiences = DB::table('experiences')
-            ->orderByDesc('experiences.start_date')
-            ->paginate(3);
+        $work = new Work();
+        $works = $work->selectExperienceWithWork($listUserIds);
+        $experiences = $this->experienceCrud->read($listUserIds);
 
         return view('admin.experience.index', compact('experiences', 'technologies', 'works'));
     }
@@ -46,15 +57,14 @@ class ExperienceController extends Controller
     /**
      * @return Application|Factory|View|RedirectResponse
      */
-    public function create()
+    public function create(): View
     {
-        $users = [];
-        $technologies = Technology::query()->orderBy('name')->pluck('name', 'id');
-        $works = Work::query()->orderBy('name')->pluck('name', 'id');
-        if(Auth::user()->user_type === 1) {
-            $users = User::query()->select('id', 'name', 'email')->orderBy('name')->get();
-        }
-        return view('admin.experience.create', compact('technologies', 'works', 'users'));
+        $listUserIds = $this->getUsersListIdsIncludesAdmin();
+
+        $technologies = $this->technologyCrud->read($listUserIds)->pluck('name', 'id');
+        $works = $this->workCrud->read($listUserIds)->pluck('name', 'id');
+
+        return view('admin.experience.create', compact('technologies', 'works'));
     }
 
     /**
@@ -63,34 +73,26 @@ class ExperienceController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate(self::VALIDATE_RULES);
-        $experience = new Experience();
-        if(Auth::user()->user_type === 1) {
-            $user = User::query()->find($request->user_id);
-            if($user) {
-                $experience->user_id = $request->user_id;
-            } else {
-                return redirect()->back()->withErrors(['errorForm' =>"Incorrect User Id!"]);
-            }
-        } else {
-            $experience->user_id = Auth::user()->id;
+        if(!$this->experienceCrud->create($request, Auth::user()->id)) {
+            return redirect()->route('experience.create')->withErrors(['errorForm' =>"Save error!"]);
         }
-        $experience = $this->saveExperience($experience, $request);
-        $experience->technologies()->attach($request->technologies);
-        $experience->works()->attach($request->works);
-        return redirect()->route('experience.create')->with('status', 'Experience ' . $request->position . ' added');
+        return redirect()->back()->with('status', 'Experience ' . $request->name . ' added.');
     }
 
     /**
      * @param $id
-     * @return Application|Factory|View
+     * @return Application|Factory|View|RedirectResponse
      */
     public function edit($id)
     {
         $experience = Experience::query()->find($id);
-        $technologies = Technology::query()->orderBy('name')->pluck('name', 'id');
-        $works = Work::query()->orderBy('name')->pluck('name', 'id');
-        return view('admin.experience.edit', compact("experience", "technologies", "works"));
+        if(!$this->checkAccessUser($experience)){
+            return redirect()->back()->withErrors(['errorForm' => self::ERROR_MASSAGE_NO_ACCESS]);
+        }
+            $listUserIds = $this->getUsersListIdsIncludesAdmin();
+            $technologies = $this->technologyCrud->read($listUserIds)->pluck('name', 'id');
+            $works = $this->workCrud->read($listUserIds)->pluck('name', 'id');
+            return view('admin.experience.edit', compact("experience", "technologies", "works"));
     }
 
     /**
@@ -100,21 +102,18 @@ class ExperienceController extends Controller
      */
     public function update(Request $request, $id): RedirectResponse
     {
-        $experience = Experience::query()->find($id);
-        if($experience) {
-            $request->validate(self::VALIDATE_RULES);
-            $experience = $this->saveExperience($experience, $request);
-            $experience->technologies()->sync($request->technologies);
-            $experience->works()->sync($request->works);
-
-            $statusMessage = "Experience - '" . $request->position . "' updated!";
-            return redirect()
-                ->route('experience.edit', compact('experience'))
-                ->with('status', $statusMessage);
-        }
-
         $statusMessage = "Error! Experience - id =" . $id . " not found!";
-        return redirect()->route('admin.index')->with('error', $statusMessage);
+        $experience = Experience::query()->find($id);
+        if ($experience) {
+            if ($this->experienceCrud->update($request, $id)) {
+                $statusMessage = "Experience - '" . $request->name . "' updated!";
+                return redirect()
+                    ->back()
+                    ->with('status', $statusMessage);
+            }
+            $statusMessage = "Update error!";
+        }
+        return redirect()->route('experience.index')->withErrors(['errorForm' =>$statusMessage]);
     }
 
     /**
@@ -123,32 +122,35 @@ class ExperienceController extends Controller
      */
     public function destroy($id): RedirectResponse
     {
-        $errorMessage = 'Experience not found!!';
-        $statusMessage = null;
+        $statusMessage = "Experience id = " . $id . " not found!";
         $experience = Experience::query()->find($id);
-        if($experience){
-            $statusMessage = 'The Experience "' . $experience->position .'" delete!';
-            $errorMessage = null;
-            $experience->technologies()->sync([]);
-            $experience->works()->sync([]);
 
-            $experience->delete();
+        if($experience) {
+            $nameExperience = $experience->name;
+            if(!$this->checkAccessUser($experience)){
+                $statusMessage = self::ERROR_MASSAGE_NO_ACCESS;
+            } else {
+                $this->experienceCrud->delete($id);
+                $statusMessage = "Experience '" . $nameExperience  . "' deleted!";
+                return redirect()->back()->with('status', $statusMessage);
+            }
         }
-        return redirect()->route('experience.index')->with([
-            'status' => $statusMessage,
-            'error' => $errorMessage
-        ]);
+        return redirect()->back()->withErrors(['errorForm' => $statusMessage]);
     }
 
     /**
      * @param int $id
-     * @return Application|Factory|View
+     * @return Application|Factory|View|RedirectResponse
      */
     public function sortingTechnologies(int $id)
     {
         $experience = Experience::query()->find($id);
+
+        if(!$this->checkAccessUser($experience)){
+            return redirect()->route('experience.index')->withErrors(['errorForm' => self::ERROR_MASSAGE_NO_ACCESS]);
+        }
         return view('admin.experience.sortingTechnologies', compact('experience'));
-    }
+   }
 
     /**
      * @param Request $request
@@ -161,21 +163,24 @@ class ExperienceController extends Controller
         $experience->technologies()->sync([]);
 
         foreach ($request->technologies as $technologyId => $technologyPriority){
-            $experience->technologies()->attach($technologyId,['priority' => (int)$technologyPriority]);
+            $experience->technologies()->attach($technologyId,['priority' => (int) $technologyPriority]);
         }
         $statusMessage = "Technology priorities updated";
-        return redirect()->route('experience.index')->with([
-            'status' => $statusMessage,
-        ]);
+        return redirect()->route('experience.index')->with(['status' => $statusMessage]);
     }
 
     /**
      * @param int $id
-     * @return Application|Factory|View
+     * @return Application|Factory|View|RedirectResponse
      */
     public function sortingWorks(int $id)
     {
         $experience = Experience::query()->find($id);
+
+        if(!$this->checkAccessUser($experience)) {
+            return redirect()->route('experience.index')->withErrors(['errorForm' => self::ERROR_MASSAGE_NO_ACCESS]);
+        }
+
         return view('admin.experience.sortingWorks', compact('experience'));
     }
 
@@ -197,22 +202,5 @@ class ExperienceController extends Controller
             'status' => $statusMessage,
         ]);
    }
-
-
-    /**
-     * @param Experience $experience
-     * @param Request $request
-     * @return Experience
-     */
-    private function saveExperience(Experience $experience, Request $request): Experience
-    {
-        $experience->company_name = $request->company_name;
-        $experience->start_date = $request->start_date;
-        $experience->end_date = $request->end_date;
-        $experience->position = $request->position;
-        $experience->save();
-        return $experience;
-    }
 }
-
 

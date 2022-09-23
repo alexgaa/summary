@@ -15,7 +15,9 @@ class CreateTechnologiesTable extends Migration
     {
         Schema::create('technologies', function (Blueprint $table) {
             $table->integer('id')->autoIncrement();
-            $table->string('name')->unique();
+            $table->bigInteger('user_id')->unsigned();
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->string('name');
             $table->text('comment')->nullable();
             $table->timestamps();
         });

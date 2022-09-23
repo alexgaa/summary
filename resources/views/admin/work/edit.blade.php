@@ -25,7 +25,7 @@
                         @error('description')
                             border-danger
                         @enderror"
-                           value="{{$work->comment}}">
+                           value="{{$work->description}}">
                 </div>
                 <button type="submit" class="btn btn-primary">Save</button>
                 <a type="submit" href="{{route('work.index')}}" class="btn btn-warning ml-3">Cancel</a>

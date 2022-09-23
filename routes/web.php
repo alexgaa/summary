@@ -34,8 +34,7 @@ Route::group(['middleware' => 'guest'], function (){
 
 Route::get('logout', [AuthUserController::class,'logout'])->name('logout')->middleware('auth');
 
-//Route::group(['prefix' => '/admin-panel', 'middleware' => 'admin'], function (){
-Route::group(['prefix' => '/admin-panel'], function (){
+Route::group(['prefix' => '/admin-panel', 'middleware' => 'auth'], function (){
     Route::get('/',[AdminController::class, 'index'])->name("admin.index");
 
     Route::resource('/experience', ExperienceController::class);

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Crud\TechnologyCrud;
+use App\Http\Controllers\AuthTrait;
 use App\Http\Controllers\Controller;
 use App\Models\Technology;
 use Illuminate\Contracts\Foundation\Application;
@@ -11,18 +13,29 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 
 
 class TechnologyController extends Controller
 {
-    private const RULES_FOR_VALIDATION_NAME = 'required|min:2|unique:technologies|max:255';
+    use AuthTrait;
+    const ERROR_MASSAGE_NO_ACCESS = 'You do not have edit access!';
+
+    /** @var TechnologyCrud  */
+    private $technologyCrud;
+
+    public function __construct()
+    {
+        $this->technologyCrud = new TechnologyCrud();
+    }
 
     /**
      * @return Application|Factory|View
      */
     public function index()
     {
-        $technologies = Technology::query()->orderBy('name')->paginate(5);
+        $listUserIds = $this->getUsersListIdsIncludesAdmin();
+        $technologies = $this->technologyCrud->read($listUserIds);
         return view('admin.technology.index', compact('technologies'));
     }
 
@@ -40,26 +53,24 @@ class TechnologyController extends Controller
      * @param Request $request
      * @return RedirectResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'name'=>self::RULES_FOR_VALIDATION_NAME,
-        ]);
-        $technology = new Technology();
-        $technology->name = $request->name;
-        $technology->comment = $request->comment;
-        $technology->save();
-
-        return redirect()->route('technology.create')->with('status', 'Technology ' . $request->name . ' added');
+        if(!$this->technologyCrud->create($request, Auth::user()->id)) {
+            return redirect()->back()->withErrors(['errorForm' =>"Save error!"]);
+        }
+        return redirect()->back()->with('status', 'Technology ' . $request->name . ' added');
     }
 
     /**
      * @param $id
-     * @return Application|Factory|View
+     * @return Application|Factory|View|RedirectResponse
      */
     public function edit($id)
     {
         $technology = Technology::query()->find($id);
+        if(!$this->checkAccessUser($technology )){
+            return redirect()->back()->withErrors(['errorForm' => self::ERROR_MASSAGE_NO_ACCESS]);
+        }
         return view('admin.technology.edit', compact('technology'));
     }
 
@@ -68,44 +79,41 @@ class TechnologyController extends Controller
      * @param int $id
      * @return RedirectResponse
      */
-    public function update(Request $request, int $id)
+    public function update(Request $request, int $id): RedirectResponse
     {
-        $technology = Technology::query()->find($id);
-        if($technology) {
-            if($technology->name != $request->name) {
-                $request->validate([
-                    'name'=>self::RULES_FOR_VALIDATION_NAME,
-                ]);
-                $technology->name = $request->name;
-            }
-
-            $technology->comment = $request->comment;
-            $technology->save();
-            $statusMessage = "Technology - '" . $request->name . "' updated!";
-            return redirect()
-                ->route('technology.edit', compact('technology'))
-                ->with('status', $statusMessage);
-        }
         $statusMessage = "Error! Technology - id =" . $id . " not found!";
-        return redirect()->route('admin.index')->with('error', $statusMessage);
+        $technology = Technology::query()->find($id);
+        if ($technology) {
+            if ($this->technologyCrud->update($request, $id)) {
+                $statusMessage = "Technology - '" . $request->name . "' updated!";
+                return redirect()
+                    ->route('technology.index')
+                    ->with('status', $statusMessage);
+            }
+            $statusMessage = "Update error!";
+        }
+        return redirect()->route('technology.index')->withErrors(['errorForm' =>$statusMessage]);
     }
 
     /**
      * @param $id
      * @return RedirectResponse
      */
-    public function destroy($id)
+    public function destroy($id): RedirectResponse
     {
+        $statusMessage = "Technology id = " . $id . " not found!";
         $technology = Technology::query()->find($id);
 
         if($technology) {
             $nameTechnology = $technology->name;
-            $technology->delete();
-            $statusMessage = "Technology '" . $nameTechnology  . "' deleted!";
-        } else {
-            $statusMessage = "Technology id = " . $id . " not found!";
+            if(!$this->checkAccessUser($technology )){
+                $statusMessage = self::ERROR_MASSAGE_NO_ACCESS;
+            } else {
+                $this->technologyCrud->delete($id);
+                $statusMessage = "Technology '" . $nameTechnology  . "' deleted!";
+                return redirect()->back()->with('status', $statusMessage);
+            }
         }
-
-        return redirect()->route('technology.index')->with('status', $statusMessage);
+        return redirect()->back()->withErrors(['errorForm' => $statusMessage]);
     }
 }

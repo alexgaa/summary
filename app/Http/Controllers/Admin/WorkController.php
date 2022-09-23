@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Crud\WorkCrud;
+use App\Http\Controllers\AuthTrait;
 use App\Http\Controllers\Controller;
 use App\Models\Work;
 use Illuminate\Http\Request;
@@ -11,16 +13,29 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 
 class WorkController extends Controller
 {
-    private const RULES_FOR_VALIDATION_NAME = 'required|min:2|unique:works|max:255';
+    use AuthTrait;
+    const ERROR_MASSAGE_NO_ACCESS = 'You do not have edit access!';
+
+    /** @var WorkCrud  */
+    private $workCrud;
+
+    public function __construct()
+    {
+        $this->workCrud = new WorkCrud();
+    }
+
     /**
      * @return Application|Factory|View
      */
     public function index()
     {
-        $works = Work::query()->orderBy('name')->paginate(5);
+        $listUserIds = $this->getUsersListIdsIncludesAdmin();
+
+        $works = $this->workCrud->read($listUserIds);
         return view('admin.work.index', compact('works'));
     }
 
@@ -29,7 +44,6 @@ class WorkController extends Controller
      */
     public function create()
     {
-
         return view('admin.work.create');
     }
 
@@ -39,24 +53,22 @@ class WorkController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'name' => self::RULES_FOR_VALIDATION_NAME
-        ]);
-        $work = new Work();
-        $work->name = $request->name;
-        $work->description = $request->description;
-        $work->save();
-
-        return redirect()->route('work.create')->with('status', 'Work ' . $request->name . ' added');
+        if(!$this->workCrud->create($request, Auth::user()->id)) {
+            return redirect()->back()->withErrors(['errorForm' =>"Save error!"]);
+        }
+        return redirect()->back()->with('status', 'Work ' . $request->name . ' added');
     }
 
     /**
      * @param $id
-     * @return Application|Factory|View
+     * @return Application|Factory|View|RedirectResponse
      */
     public function edit($id)
     {
         $work = Work::query()->find($id);
+        if(!$this->checkAccessUser($work)){
+            return redirect()->back()->withErrors(['errorForm' => self::ERROR_MASSAGE_NO_ACCESS]);
+        }
         return view('admin.work.edit', compact('work'));
     }
 
@@ -67,23 +79,18 @@ class WorkController extends Controller
      */
     public function update(Request $request, $id): RedirectResponse
     {
+        $statusMessage = "Error! Work - id =" . $id . " not found!";
         $work = Work::query()->find($id);
-        if($work) {
-            if ($work->name != $request->name) {
-                $request->validate([
-                    'name' => self::RULES_FOR_VALIDATION_NAME
-                ]);
-                $work->name = $request->name;
-            }
-            $work->description = $request->description;
-            $work->save();
-            $statusMessage = "Work - '" . $request->name . "' updated!";
-            return redirect()
-                ->route('work.edit', compact('work'))
-                ->with('status', $statusMessage);
+        if ($work) {
+           if ($this->workCrud->update($request, $id)) {
+                $statusMessage = "Work - '" . $request->name . "' updated!";
+                return redirect()
+                    ->back()
+                    ->with('status', $statusMessage);
+           }
+           $statusMessage = "Update error!";
         }
-        $statusMessage = "Error! Technology - id =" . $id . " not found!";
-        return redirect()->route('admin.index')->with('error', $statusMessage);
+        return redirect()->back()->withErrors(['errorForm' =>$statusMessage]);
     }
 
     /**
@@ -92,14 +99,19 @@ class WorkController extends Controller
      */
     public function destroy($id): RedirectResponse
     {
+        $statusMessage = "Work id = " . $id . " not found!";
         $work = Work::query()->find($id);
+
         if($work) {
             $nameWork = $work->name;
-            $work->delete();
-            $statusMessage = "Technology '" . $nameWork  . "' deleted!";
-        } else {
-            $statusMessage = "Technology id = " . $id . " not found!";
+            if(!$this->checkAccessUser($work)){
+                $statusMessage = self::ERROR_MASSAGE_NO_ACCESS;
+            } else {
+                $this->workCrud->delete($id);
+                $statusMessage = "Work '" . $nameWork  . "' deleted!";
+                return redirect()->back()->with('status', $statusMessage);
+            }
         }
-        return redirect()->route('work.index')->with('status', $statusMessage);
+        return redirect()->back()->withErrors(['errorForm' => $statusMessage]);
     }
 }

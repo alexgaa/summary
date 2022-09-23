@@ -8,7 +8,7 @@
         <h3 class="card-title text-bold">Add new User Data</h3>
     </div>
     <div class="card-body">
-        @if(!count($users))
+        @if(count($usersFullData))
             <div class="text-danger text-center">
                 <p class="text-xl">No free users! All users have full data.</p>
                 <p class="text-md"><b>Recommendation:</b> Register a new user or Edit the created old users.</p>
@@ -21,15 +21,12 @@
 
                     <label for="user_id" class="col-sm-2 col-form-label @error('user_id')
                                 text-danger
-                            @enderror">User for  :</label>
+                            @enderror">User login:</label>
                     <div class="col-sm-8">
-                        <select required name='user_id' id="user_id" class="select2"
-                             style="width: 100%" data-placeholder="Select User...." >
-                            <option></option>
-                            @foreach($users as $user)
-                                <option value="{{$user->id}}">{{$user->name}} ({{$user->email}})</option>
-                            @endforeach
-                        </select>
+                         <input  type="text" id="name"
+                                class="form-control text-blue"
+                                disabled
+                                value="{{auth()->user()->name}} ({{auth()->user()->email}})">
                     </div>
                 </div>
                 <div class="form-group row">

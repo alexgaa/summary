@@ -10,18 +10,6 @@
     <div class="card-body">
         <form action="{{route("experience.store")}}" method="POST">
             @csrf
-            @if(count($users))
-                <div class="mb-3">
-                    <label for="user_id" class="form-label">User :</label>
-                    <select required name='user_id' id="user_id" class="select2"
-                            style="width: 100%" data-placeholder="Select User...." >
-                        <option></option>
-                        @foreach($users as $user)
-                            <option value="{{$user->id}}">{{$user->name}} ({{$user->email}})</option>
-                        @endforeach
-                    </select>
-                </div>
-           @endif
             <div class="mb-3">
                 <label for="start_date" class="form-label">Start Date :</label>
                 <input name="start_date" type="date" id="start_date"
