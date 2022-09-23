@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Crud;
 
-use App\Models\Technology;
 use App\Models\User;
+use App\Models\Work;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 
-class TechnologyCrud
+class WorkCrud
 {
     private const RULES_FOR_VALIDATION = ['name' => 'required|min:2|max:255'];
 
@@ -22,13 +22,13 @@ class TechnologyCrud
     public function read(array $usersId, int $paginatePage = 0, string $orderByColumn = 'name'): LengthAwarePaginator
     {
         if($usersId !== []) {
-            $technology = Technology::query()->
+            $works = Work::query()->
             whereIn('user_id', $usersId)->
             orderBy($orderByColumn)->paginate($paginatePage);
         } else {
-            $technology = Technology::query()->orderBy($orderByColumn)->paginate($paginatePage);
+            $works = Work::query()->orderBy($orderByColumn)->paginate($paginatePage);
         }
-        return $technology;
+        return $works;
     }
 
     /**
@@ -42,11 +42,11 @@ class TechnologyCrud
         if(!User::query()->find($userID)) {
             return false;
         }
-        $technology = new Technology();
-        $technology->user_id = $userID;
-        $technology->name = $request->name;
-        $technology->comment = $request->comment;
-        $technology->save();
+        $work = new Work();
+        $work->user_id = $userID;
+        $work->name = $request->name;
+        $work->description = $request->description;
+        $work->save();
         return true;
     }
 
@@ -57,12 +57,12 @@ class TechnologyCrud
      */
     public function update(Request $request, $id): bool
     {
-        $technology = Technology::query()->find($id);
-        if($technology) {
+        $work = Work::query()->find($id);
+        if($work) {
             $request->validate(self::RULES_FOR_VALIDATION);
-            $technology->name = $request->name;
-            $technology->comment = $request->comment;
-            $technology->save();
+            $work->name = $request->name;
+            $work->description = $request->description;
+            $work->save();
             return true;
         }
         return false;
@@ -75,10 +75,10 @@ class TechnologyCrud
     public function delete($id): bool
     {
         $resultStatus = false;
-        $technology = Technology::query()->find($id);
-        if($technology) {
-            $technology->experiences()->sync([]);
-            $technology->delete();
+        $work = Work::query()->find($id);
+        if($work) {
+            $work->experiences()->sync([]);
+            $work->delete();
             $resultStatus = true;
         }
         return $resultStatus;

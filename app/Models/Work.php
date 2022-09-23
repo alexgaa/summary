@@ -31,6 +31,7 @@ class Work extends Model
                 ->select(
                     'experiences.id',
                     'experience_work.priority',
+                    'works.description',
                     'works.name as work_name'
                 )
                 ->join(

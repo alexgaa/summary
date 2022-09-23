@@ -183,4 +183,5 @@ class UserFullData extends Model
         }
         return $value;
     }
+
 }

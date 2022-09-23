@@ -35,7 +35,7 @@ class WorkController extends Controller
     {
         $listUserIds = $this->getUsersListIdsIncludesAdmin();
 
-        $works = $this->workCrud->read($listUserIds);
+        $works = $this->workCrud->read($listUserIds, 5);
         return view('admin.work.index', compact('works'));
     }
 

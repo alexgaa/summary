@@ -7,9 +7,9 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Summary Gamov AA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
-{{--    <link rel="stylesheet" href="{{asset('css/summary.css')}}">--}}
+    <link rel="stylesheet" href="{{asset('css/summary.css')}}">
 </head>
-<body>
+<body class="main-background-images">
 <header class="p-3 text-bg-dark mb-2 sticky-top">
         <div class="container" >
             <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
@@ -18,17 +18,10 @@
                 <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
                     <li><a href="{{route('main')}}" class="nav-link px-2 text-secondary">Home</a></li>
                     @auth
-{{--                        @if(auth()->user()->user_type === 1)--}}
-                            <li><a href="{{route('admin.index')}}" class="nav-link px-2 text-white">Admin</a></li>
-{{--                        @endif--}}
+                            <li><a href="{{route('admin.index')}}" class="nav-link px-2 text-white">Constructor</a></li>
                     @endauth
                     <li><a href="{{route('about')}}" class="nav-link px-2 text-white">About</a></li>
                 </ul>
-
-                <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
-                    <input type="search" class="form-control form-control-dark text-bg-dark" placeholder="Search..." aria-label="Search">
-                </form>
-
                 <div class="text-end">
                     @auth
                         <a href="{{route('logout')}}" type="button" class="btn btn-warning me-2">Logout</a>
@@ -57,15 +50,12 @@
         </div>
     </div>
 </div>
-{{--    <div class="b-example-divider"> </div>--}}
     <div class="container">
         <footer class="py-1 my-0">
             <ul class="nav justify-content-center border-bottom pb-3 mb-3">
                 <li class="nav-item"><a href="{{route('main')}}" class="nav-link px-2 text-muted">Home</a></li>
                 @auth
-                    @if(auth()->user()->user_type === 1)
-                        <li class="nav-item"><a href="{{route('admin.index')}}" class="nav-link px-2 text-muted">Admin</a></li>
-                       @endif
+                    <li class="nav-item"><a href="{{route('admin.index')}}" class="nav-link px-2 text-muted">Constructor Summary </a></li>
                 @endauth
                 <li class="nav-item"><a href="{{route('about')}}" class="nav-link px-2 text-muted">About</a></li>
             </ul>

@@ -32,8 +32,8 @@ class UserFullDataController extends Controller
     private $technologyCrud;
     /** @var WorkCrud  */
     private $workCrud;
-
-    private $usersFullData;
+    /** @var UserFullDataCrud  */
+    private $usersFullDataCrud;
 
     public function __construct()
     {

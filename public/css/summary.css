@@ -8,3 +8,10 @@
 .about {
     height: 500px;
 }
+
+.main-background-images{
+}
+.block-min-height {
+    min-height: 600px;
+
+}

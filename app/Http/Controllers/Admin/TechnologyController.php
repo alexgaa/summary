@@ -35,7 +35,7 @@ class TechnologyController extends Controller
     public function index()
     {
         $listUserIds = $this->getUsersListIdsIncludesAdmin();
-        $technologies = $this->technologyCrud->read($listUserIds);
+        $technologies = $this->technologyCrud->read($listUserIds, 5);
         return view('admin.technology.index', compact('technologies'));
     }
 

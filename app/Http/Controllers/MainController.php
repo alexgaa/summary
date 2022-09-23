@@ -4,65 +4,57 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Crud\ExperienceCrud;
+use App\Crud\TechnologyCrud;
+use App\Crud\UserFullDataCrud;
+use App\Crud\WorkCrud;
 use App\Models\Experience;
 use App\Models\Technology;
 use App\Models\UserFullData;
+use App\Models\Work;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class MainController extends Controller
 {
+    use AuthTrait;
+    public const DEFAULT_USER_ID = 1;
+
+//    /** @var ExperienceCrud  */
+//    private $experienceCrud;
+//    /** @var TechnologyCrud  */
+//    private $technologyCrud;
+//    /** @var WorkCrud  */
+//    private $workCrud;
+    /** @var UserFullDataCrud  */
+    private $usersFullDataCrud;
+
+    public function __construct()
+    {
+//        $this->experienceCrud = new ExperienceCrud();
+//        $this->technologyCrud = new TechnologyCrud();
+//        $this->workCrud = new WorkCrud();
+        $this->usersFullDataCrud = new UserFullDataCrud();
+    }
+
     public function index()
     {
+        $listUserIds = [];
+        if(auth()->check()) {
+            $listUserIds[] = $this->getOnlyUsersListIds();
+        } else {
+            $listUserIds[] = self::DEFAULT_USER_ID;
+        }
 
-        $technologies = DB::table('experiences')
-            ->select('experiences.id',
-                'experience_technology.priority',
-                'technologies.name as technology_name')
-            ->join('experience_technology',
-                'experience_technology.experience_id',
-                '=', 'experiences.id')
-            ->join('technologies',
-                'experience_technology.technology_id',
-                '=', 'technologies.id')
-            ->orderBy('experience_technology.priority')
-            ->get();
+        $technology = new Technology();
+        $technologies = $technology->selectExperienceWithTechnology($listUserIds);
+        $work = new Work();
+        $works = $work->selectExperienceWithWork($listUserIds);
 
-        $works = DB::table('experiences')
-            ->select('experiences.id',
-                'experience_work.priority',
-                'works.name as work_name',
-                'works.description')
-            ->join('experience_work',
-                'experience_work.experience_id',
-                '=', 'experiences.id')
-            ->join('works',
-                'experience_work.work_id',
-                '=', 'works.id')
-            ->orderBy('experience_work.priority')
-            ->get();
+        $usersFullData = $this->usersFullDataCrud->read($listUserIds);
 
-        $experiences = DB::table('experiences')
-            ->orderByDesc('experiences.start_date')
-            ->get();
+        $userFullData = $usersFullData[0];
 
-
-//        $userFullData = new UserFullData();
-//        $userFullData->user_id = 2;
-//        $userFullData->name = 'aleksey';
-//        $userFullData->save();
-
-//        $technology = new Technology();
-//        $technology->name = 'Mysql2';
-//        $technology->save();
-//        $experience = new Experience();
-//        $experience->start_date = date('Y-m-d');
-//        $experience->position = "Программист4";
-//        $experience->save();
-//
-//        $experience->technologies()->attach($technology);
-
-
-        return view('main.index', compact('experiences', 'technologies', 'works'));
+        return view('main.index', compact('userFullData', 'technologies', 'works'));
     }
 }

@@ -40,4 +40,28 @@ class Experience extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * @return false|string
+     */
+    public function formatStartDate()
+    {
+        if ($this->start_date) {
+            return date('m.Y', strtotime($this->start_date));
+        } else {
+            return '';
+        }
+    }
+    /**
+     * @return false|string
+     */
+    public function formatEndDate()
+    {
+        if ($this->start_date) {
+            return date('m.Y', strtotime($this->start_date));
+        } else {
+            return '';
+        }
+    }
+
 }

@@ -49,7 +49,7 @@ class ExperienceController extends Controller
 
         $work = new Work();
         $works = $work->selectExperienceWithWork($listUserIds);
-        $experiences = $this->experienceCrud->read($listUserIds);
+        $experiences = $this->experienceCrud->read($listUserIds, 5);
 
         return view('admin.experience.index', compact('experiences', 'technologies', 'works'));
     }
