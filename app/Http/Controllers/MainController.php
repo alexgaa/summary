@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Crud\ExperienceCrud;
-use App\Crud\TechnologyCrud;
 use App\Crud\UserFullDataCrud;
-use App\Crud\WorkCrud;
-use App\Models\Experience;
 use App\Models\Technology;
-use App\Models\UserFullData;
 use App\Models\Work;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 
 class MainController extends Controller
 {
@@ -28,10 +25,13 @@ class MainController extends Controller
         $this->usersFullDataCrud = new UserFullDataCrud();
     }
 
+    /**
+     * @return Application|Factory|View
+     */
     public function index()
     {
         $listUserIds = [];
-        if(auth()->check()) {
+        if(auth()->check() && (int) Auth::user()->user_type !== (int) $_ENV['USER_TYPE_ADMIN']) {
             $listUserIds = $this->getOnlyUsersListIds();
         } else {
             $listUserIds[] = self::DEFAULT_USER_ID;
