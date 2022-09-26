@@ -83,7 +83,7 @@ class UserFullDataController extends Controller
             return redirect()->route('user-full-data.create')->withErrors(['errorForm' =>"Save error!"]);
         }
 
-        return redirect()->route('admin.userFullData.index')->with('status', 'User data for: ' . $request->name . ' - added!');
+        return redirect()->route('user-full-data.index')->with('status', 'User data for: ' . $request->name . ' - added!');
     }
 
     /**

@@ -19,6 +19,7 @@
                         <div class="col-3"></div>
                     </div>
                 </div>
+                @if($userFullData->jobTitle)
                 <div class="container">
                     <div class="row">
                     <div class="col-3"></div>
@@ -35,17 +36,20 @@
                     <div class="col-3"></div>
                 </div>
                 </div>
-                <div class="container">
-                    <div class="row">
-                        <div class="col-3"></div>
-                        <div class="col-6 text-center">
-                            <p class="fs-6 fw-bold text-secondary">
-                                {{$userFullData->contact}}
-                            </p>
+                @endif
+                @if($userFullData->contact)
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-3"></div>
+                            <div class="col-6 text-center">
+                                <p class="fs-6 fw-bold text-secondary">
+                                    {{$userFullData->contact}}
+                                </p>
+                            </div>
+                            <div class="col-3"></div>
                         </div>
-                        <div class="col-3"></div>
                     </div>
-                </div>
+                @endif
             </div>
             <div>
                 <div class="container">
@@ -89,7 +93,7 @@
                             </div>
                         @endforeach
                     @endif
-                    @if(count($userFullData->education))
+                    @if($userFullData->education)
                     <div class="row mt-1">
                         <div class="col text-center">
                             <p class="fs-2 fw-bold">
@@ -103,61 +107,61 @@
                         </div>
                     </div>
                     @endif
-                    @if(count($userFullData->mainSkills))
-                    <div class="row mt-1">
-                        <div class="col text-center">
-                            <p class="fs-2 fw-bold">
-                                Ключевые навыки:
-                            </p>
+                    @if($userFullData->mainSkills)
+                        <div class="row mt-1">
+                            <div class="col text-center">
+                                <p class="fs-2 fw-bold">
+                                    Ключевые навыки:
+                                </p>
+                            </div>
+                            <div>
+                                @foreach($userFullData->mainSkills as $mainSkills)
+                                    {{$mainSkills}}<br>
+                                @endforeach
+                            </div>
                         </div>
-                        <div>
-                            @foreach($userFullData->mainSkills as $mainSkills)
-                                {{$mainSkills}}<br>
-                            @endforeach
-                        </div>
-                    </div>
                     @endif
                     @if($userFullData->achievements)
-                    <div class="row mt-1">
-                        <div class="col text-center">
-                            <p class="fs-2 fw-bold">
-                                Достижения:
-                            </p>
+                        <div class="row mt-1">
+                            <div class="col text-center">
+                                <p class="fs-2 fw-bold">
+                                    Достижения:
+                                </p>
+                            </div>
+                            <div>
+                                @foreach($userFullData->achievements as $achievement)
+                                    {{$achievement}}<br>
+                                @endforeach
+                            </div>
                         </div>
-                        <div>
-                            @foreach($userFullData->achievements as $achievement)
-                                {{$achievement}}<br>
-                            @endforeach
-                        </div>
-                    </div>
                     @endif
                     @if($userFullData->personalQualities)
-                    <div class="row mt-1">
-                        <div class="col text-center">
-                            <p class="fs-2 fw-bold">
-                                Личные качества:
-                            </p>
+                        <div class="row mt-1">
+                            <div class="col text-center">
+                                <p class="fs-2 fw-bold">
+                                    Личные качества:
+                                </p>
+                            </div>
+                            <div>
+                                @foreach($userFullData->personalQualities as $personalQualities)
+                                    {{$personalQualities}}<br>
+                                @endforeach
+                            </div>
                         </div>
-                        <div>
-                            @foreach($userFullData->personalQualities as $personalQualities)
-                                {{$personalQualities}}<br>
-                            @endforeach
-                        </div>
-                    </div>
                     @endif
                     @if($userFullData->other)
-                    <div class="row mt-1">
-                        <div class="col text-center">
-                            <p class="fs-2 fw-bold">
-                                Прочие:
-                            </p>
+                        <div class="row mt-1">
+                            <div class="col text-center">
+                                <p class="fs-2 fw-bold">
+                                    Прочие:
+                                </p>
+                            </div>
+                            <div>
+                                @foreach($userFullData->other as $other)
+                                    {{$other}}<br>
+                                @endforeach
+                            </div>
                         </div>
-                        <div>
-                            @foreach($userFullData->other as $other)
-                                {{$other}}<br>
-                            @endforeach
-                        </div>
-                    </div>
                     @endif
                 </div>
             </div>

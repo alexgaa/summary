@@ -161,9 +161,10 @@ class ExperienceController extends Controller
     {
         $experience = Experience::query()->find($id);
         $experience->technologies()->sync([]);
-
-        foreach ($request->technologies as $technologyId => $technologyPriority){
-            $experience->technologies()->attach($technologyId,['priority' => (int) $technologyPriority]);
+        if ($request->technologies) {
+            foreach ($request->technologies as $technologyId => $technologyPriority) {
+                $experience->technologies()->attach($technologyId, ['priority' => (int)$technologyPriority]);
+            }
         }
         $statusMessage = "Technology priorities updated";
         return redirect()->route('experience.index')->with(['status' => $statusMessage]);
@@ -193,9 +194,10 @@ class ExperienceController extends Controller
     {
         $experience = Experience::query()->find($id);
         $experience->works()->sync([]);
-
-        foreach ($request->works as $workId => $workPriority){
-            $experience->works()->attach($workId,['priority' => (int)$workPriority]);
+        if ($request->works) {
+            foreach ($request->works as $workId => $workPriority) {
+                $experience->works()->attach($workId, ['priority' => (int)$workPriority]);
+            }
         }
         $statusMessage = "Work priorities updated";
         return redirect()->route('experience.index')->with([

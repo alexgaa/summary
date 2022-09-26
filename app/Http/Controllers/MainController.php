@@ -20,20 +20,11 @@ class MainController extends Controller
     use AuthTrait;
     public const DEFAULT_USER_ID = 1;
 
-//    /** @var ExperienceCrud  */
-//    private $experienceCrud;
-//    /** @var TechnologyCrud  */
-//    private $technologyCrud;
-//    /** @var WorkCrud  */
-//    private $workCrud;
     /** @var UserFullDataCrud  */
     private $usersFullDataCrud;
 
     public function __construct()
     {
-//        $this->experienceCrud = new ExperienceCrud();
-//        $this->technologyCrud = new TechnologyCrud();
-//        $this->workCrud = new WorkCrud();
         $this->usersFullDataCrud = new UserFullDataCrud();
     }
 
@@ -41,7 +32,7 @@ class MainController extends Controller
     {
         $listUserIds = [];
         if(auth()->check()) {
-            $listUserIds[] = $this->getOnlyUsersListIds();
+            $listUserIds = $this->getOnlyUsersListIds();
         } else {
             $listUserIds[] = self::DEFAULT_USER_ID;
         }

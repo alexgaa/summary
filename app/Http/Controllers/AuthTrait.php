@@ -16,7 +16,7 @@ trait AuthTrait
     public function getUsersListIdsIncludesAdmin(): array
     {
         $listUserIds = [];
-        if(Auth::user()->user_type !== (int) $_ENV['USER_TYPE_ADMIN']) {
+        if((int) Auth::user()->user_type !== (int) $_ENV['USER_TYPE_ADMIN']) {
             $users = User::query()
                 ->select('id')
                 ->where('user_type', '=', $_ENV['USER_TYPE_ADMIN'])
@@ -35,7 +35,7 @@ trait AuthTrait
     public function getOnlyUsersListIds(): array
     {
         $listUserIds = [];
-        if(Auth::user()->user_type !== (int) $_ENV['USER_TYPE_ADMIN']) {
+        if((int) Auth::user()->user_type !== (int) $_ENV['USER_TYPE_ADMIN']) {
             $listUserIds[] = Auth::user()->id;
         }
         return $listUserIds;
@@ -47,8 +47,8 @@ trait AuthTrait
      */
     public function checkAccessUser(Model $model): bool
     {
-        if (Auth::user()->user_type !== (int) $_ENV['USER_TYPE_ADMIN'] &&
-            $model->user_id !== Auth::user()->id
+        if ((int) Auth::user()->user_type !== (int) $_ENV['USER_TYPE_ADMIN'] &&
+            (int) $model->user_id !== (int) Auth::user()->id
         ) {
             return false;
         }
