@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ExperienceController;
 use App\Http\Controllers\Admin\TechnologyController;
 use App\Http\Controllers\Admin\WorkController;
 use App\Http\Controllers\Auth\AuthUserController;
+use App\Http\Controllers\Category\CategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\Auth\RegisteredUser;
@@ -23,7 +24,9 @@ use App\Http\Controllers\Admin\UserFullDataController;
 */
 
 Route::get('/', [MainController::class, 'index'])->name('main');
-Route::get('about',[AboutController::class, 'index'])->name('about');
+Route::get('about/',[AboutController::class, 'index'])->name('about');
+
+Route::resource('category',CategoryController::class);
 
 Route::group(['middleware' => 'guest'], function (){
     Route::get('register',[RegisteredUser::class,'create'])->name('registerUser.create');

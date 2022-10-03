@@ -1,8 +1,9 @@
 @extends('template.mainTemplate')
+@include('template.menu-left')
 
 @section('content')
 
-    <div class="flex-shrink-0 p-3" style="min-height: 600px">
+    <div class="flex-shrink-0 p-3">
         @if(!$userFullData)
             <h1 class="text-success text-center">
                 Hello!<br> Summary not found!

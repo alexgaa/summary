@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Crud\CategoryCrud;
 use App\Crud\UserFullDataCrud;
 use App\Models\Technology;
 use App\Models\Work;
@@ -19,10 +20,13 @@ class MainController extends Controller
 
     /** @var UserFullDataCrud  */
     private $usersFullDataCrud;
+    /** @var CategoryCrud  */
+    private $categoryCrud;
 
     public function __construct()
     {
         $this->usersFullDataCrud = new UserFullDataCrud();
+        $this->categoryCrud = new CategoryCrud();
     }
 
     /**
@@ -37,6 +41,7 @@ class MainController extends Controller
             $listUserIds[] = self::DEFAULT_USER_ID;
         }
 
+        $categories = $this->categoryCrud->read();
         $technology = new Technology();
         $technologies = $technology->selectExperienceWithTechnology($listUserIds);
         $work = new Work();
@@ -46,6 +51,6 @@ class MainController extends Controller
 
         $userFullData = $usersFullData[0];
 
-        return view('main.index', compact('userFullData', 'technologies', 'works'));
+        return view('main.index', compact('userFullData', 'technologies', 'works', 'categories'));
     }
 }

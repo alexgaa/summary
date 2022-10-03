@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Crud\CategoryCrud;
+
 
 class AboutController extends Controller
 {
     public function index()
     {
-        return view('about');
+        $categoryCrud = new CategoryCrud();
+        $categories = $categoryCrud->read();
+
+        return view('about', compact('categories'));
     }
 }

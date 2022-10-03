@@ -1,4 +1,5 @@
 @extends('template.mainTemplate')
+@include('template.menu-left')
 
 @section('content')
     <div class="container">

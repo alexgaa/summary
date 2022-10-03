@@ -5,12 +5,15 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Summary Gamov AA</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{asset('admin/plugins/fontawesome-free/css/all.min.css')}}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
     <link rel="stylesheet" href="{{asset('css/summary.css')}}">
 </head>
-<body class="main-background-images">
-<header class="p-3 text-bg-dark mb-2 sticky-top">
+<body>
+<header class="p-3 bg-dark mb-2 sticky-top">
         <div class="container" >
             <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
                 <p class="mb-2 mb-md-0 justify-content-center"> GAA</p>
@@ -36,14 +39,14 @@
     </header>
 
 <div class="container-fluid pb-2">
-    <div class="row g-2 ">
-        <div class="col-3 ">
-            <div class="p-3 m-2 border bg-light rounded-3">
-                Menu `<br><br><br>
+    <div class="row g-2">
+        <div class="col-3">
+            <div id='menu-left' class="p-3 m-2 border bg-light rounded-3">
+                @yield('menu-left')
             </div>
         </div>
         <div class="col-9">
-            <div class="p-3 m-2 bg-light border rounded-3">
+            <div id='center-content' class="p-3 m-2 bg-light border rounded-3">
                 @yield('content')
             </div>
 
@@ -62,7 +65,25 @@
             <p class="text-center text-muted">© 2022 Gamov Aleksey</p>
         </footer>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js" integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+
+<!-- Вариант 1: Bootstrap в связке с Popper -->
+
+{{--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>--}}
+{{--<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>--}}
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="{{asset('js/my_js.js')}}"></script>
+
 </body>
 </html>
