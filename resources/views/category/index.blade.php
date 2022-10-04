@@ -3,11 +3,23 @@
 @section('menu-left')
     <div class="container">
         <div class="row g-2 m-2 border-bottom">
-            <div class="col-6">
+            <div class="col-8">
                 <h2><strong>Categories</strong></h2>
             </div>
-            <div class="col-6 text-end">
+            <div class="col-4 text-end">
                 <a class="center-block" href="{{route('category.index')}}">
+                    <i class="fa fa-wrench"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row g-2 m-2 border-bottom">
+            <div class="col-8">
+                <h2><strong>Posts Type </strong></h2>
+            </div>
+            <div class="col-4 text-end">
+                <a class="center-block" href="{{route('post-type.index')}}">
                     <i class="fa fa-wrench"></i>
                 </a>
             </div>

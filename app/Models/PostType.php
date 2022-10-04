@@ -6,19 +6,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-
-class Category extends Model
+class PostType extends Model
 {
     use HasFactory;
     protected $primaryKey='id';
 
     /**
-     * @return HasMany
+     * @return BelongsTo
      */
-    public function postType(): HasMany
+    public function category(): BelongsTo
     {
-        return $this->hasMany(PostType::class);
+        return $this->belongsTo(Category::class);
     }
 }
